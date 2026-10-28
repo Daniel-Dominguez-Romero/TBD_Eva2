@@ -1,0 +1,923 @@
+EVA2_6_USING_JOINS
+
+MySQL Shell 8.0.46
+
+Copyright (c) 2016, 2026, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS > \connect root@localhost
+Creating a session to 'root@localhost'
+Please provide the password for 'root@localhost':
+Save password for 'root@localhost'? [Y]es/[N]o/Ne[v]er (default No):
+Fetching schema names for auto-completion... Press ^C to stop.
+Your MySQL connection id is 8
+Server version: 8.4.7 MySQL Community Server - GPL
+No default schema selected; type \use <schema> to set one.
+ MySQL  localhost:3306 ssl  JS > \sql
+Switching to SQL mode... Commands end with ;
+Fetching global names for auto-completion... Press ^C to stop.
+ MySQL  localhost:3306 ssl  SQL > SET SESSION default_storage_engine = 'InnoDB';
+Query OK, 0 rows affected (0.0005 sec)
+ MySQL  localhost:3306 ssl  SQL > set global default_storage_engine = 'InnoDB';
+Query OK, 0 rows affected (0.0005 sec)
+ MySQL  localhost:3306 ssl  SQL > SHOW VARIABLES LIKE 'default_storage_engine';
++------------------------+--------+
+| Variable_name          | Value  |
++------------------------+--------+
+| default_storage_engine | InnoDB |
++------------------------+--------+
+1 row in set (0.0029 sec)
+ MySQL  localhost:3306 ssl  SQL > use eva2;
+Default schema set to `eva2`.
+Fetching global names, object names from `eva2` for auto-completion... Press ^C to stop.
+ MySQL  localhost:3306 ssl  eva2  SQL > use sakila;
+Default schema set to `sakila`.
+Fetching global names, object names from `sakila` for auto-completion... Press ^C to stop.
+ MySQL  localhost:3306 ssl  sakila  SQL > desc film;
++----------------------+---------------------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field                | Type                                                                | Null | Key | Default           | Extra                                         |
++----------------------+---------------------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| film_id              | smallint unsigned                                                   | NO   | PRI | NULL              | auto_increment                                |
+| title                | varchar(255)                                                        | NO   | MUL | NULL              |                                               |
+| description          | text                                                                | YES  |     | NULL              |                                               |
+| release_year         | year                                                                | YES  |     | NULL              |                                               |
+| language_id          | tinyint unsigned                                                    | NO   | MUL | NULL              |                                               |
+| original_language_id | tinyint unsigned                                                    | YES  | MUL | NULL              |                                               |
+| rental_duration      | tinyint unsigned                                                    | NO   |     | 3                 |                                               |
+| rental_rate          | decimal(4,2)                                                        | NO   |     | 4.99              |                                               |
+| length               | smallint unsigned                                                   | YES  |     | NULL              |                                               |
+| replacement_cost     | decimal(5,2)                                                        | NO   |     | 19.99             |                                               |
+| rating               | enum('G','PG','PG-13','R','NC-17')                                  | YES  |     | G                 |                                               |
+| special_features     | set('Trailers','Commentaries','Deleted Scenes','Behind the Scenes') | YES  |     | NULL              |                                               |
+| last_update          | timestamp                                                           | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++----------------------+---------------------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+13 rows in set (0.0031 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc_film category;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'desc_film category' at line 1
+ MySQL  localhost:3306 ssl  sakila  SQL > desc category
+                                       -> ;
++-------------+------------------+------+-----+-------------------+-----------------------------------------------+
+| Field       | Type             | Null | Key | Default           | Extra                                         |
++-------------+------------------+------+-----+-------------------+-----------------------------------------------+
+| category_id | tinyint unsigned | NO   | PRI | NULL              | auto_increment                                |
+| name        | varchar(25)      | NO   |     | NULL              |                                               |
+| last_update | timestamp        | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-------------+------------------+------+-----+-------------------+-----------------------------------------------+
+3 rows in set (0.0024 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > show tables;
++----------------------------+
+| Tables_in_sakila           |
++----------------------------+
+| actor                      |
+| actor_info                 |
+| address                    |
+| category                   |
+| city                       |
+| country                    |
+| customer                   |
+| customer_list              |
+| film                       |
+| film_actor                 |
+| film_category              |
+| film_list                  |
+| film_text                  |
+| inventory                  |
+| language                   |
+| nicer_but_slower_film_list |
+| payment                    |
+| rental                     |
+| sales_by_film_category     |
+| sales_by_store             |
+| staff                      |
+| staff_list                 |
+| store                      |
++----------------------------+
+23 rows in set (0.0021 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > select a.title, c.name
+                                       -> fiilm a
+                                       -> inner join film_category b
+                                       -> on a.film_id = b.^C
+ MySQL  localhost:3306 ssl  sakila  SQL > select count(*) from film;
++----------+
+| count(*) |
++----------+
+|     1000 |
++----------+
+1 row in set (0.0253 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > select count(*) from payment;
++----------+
+| count(*) |
++----------+
+|    16049 |
++----------+
+1 row in set (0.0224 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > select a.title, c.name
+                                       -> film a
+                                       -> inner join film_category b
+                                       -> on a.film_id = b.film_id
+                                       -> inner join category c on
+                                       -> c.category_id = b.category_id
+                                       -> limit 100;
+ERROR: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'a
+inner join film_category b
+on a.film_id = b.film_id
+inner join category c on' at line 2
+ MySQL  localhost:3306 ssl  sakila  SQL > select a.title, c.name from film a  inner join film_category b  on a.film_id = b.film_id inner join category c on  c.category_id = b.category_id limit 100;
++-------------------------+-----------+
+| title                   | name      |
++-------------------------+-----------+
+| AMADEUS HOLY            | Action    |
+| AMERICAN CIRCUS         | Action    |
+| ANTITRUST TOMATOES      | Action    |
+| ARK RIDGEMONT           | Action    |
+| BAREFOOT MANCHURIAN     | Action    |
+| BERETS AGENT            | Action    |
+| BRIDE INTRIGUE          | Action    |
+| BULL SHAWSHANK          | Action    |
+| CADDYSHACK JEDI         | Action    |
+| CAMPUS REMEMBER         | Action    |
+| CASUALTIES ENCINO       | Action    |
+| CELEBRITY HORN          | Action    |
+| CLUELESS BUCKET         | Action    |
+| CROW GREASE             | Action    |
+| DANCES NONE             | Action    |
+| DARKO DORADO            | Action    |
+| DARN FORRESTER          | Action    |
+| DEVIL DESIRE            | Action    |
+| DRAGON SQUAD            | Action    |
+| DREAM PICKUP            | Action    |
+| DRIFTER COMMANDMENTS    | Action    |
+| EASY GLADIATOR          | Action    |
+| ENTRAPMENT SATISFACTION | Action    |
+| EXCITEMENT EVE          | Action    |
+| FANTASY TROOPERS        | Action    |
+| FIREHOUSE VIETNAM       | Action    |
+| FOOL MOCKINGBIRD        | Action    |
+| FORREST SONS            | Action    |
+| GLASS DYING             | Action    |
+| GOSFORD DONNIE          | Action    |
+| GRAIL FRANKENSTEIN      | Action    |
+| HANDICAP BOONDOCK       | Action    |
+| HILLS NEIGHBORS         | Action    |
+| KISSING DOLLS           | Action    |
+| LAWRENCE LOVE           | Action    |
+| LORD ARIZONA            | Action    |
+| LUST LOCK               | Action    |
+| MAGNOLIA FORRESTER      | Action    |
+| MIDNIGHT WESTWARD       | Action    |
+| MINDS TRUMAN            | Action    |
+| MOCKINGBIRD HOLLYWOOD   | Action    |
+| MONTEZUMA COMMAND       | Action    |
+| PARK CITIZEN            | Action    |
+| PATRIOT ROMAN           | Action    |
+| PRIMARY GLASS           | Action    |
+| QUEST MUSSOLINI         | Action    |
+| REAR TRADING            | Action    |
+| RINGS HEARTBREAKERS     | Action    |
+| RUGRATS SHAKESPEARE     | Action    |
+| SHRUNK DIVINE           | Action    |
+| SIDE ARK                | Action    |
+| SKY MIRACLE             | Action    |
+| SOUTH WAIT              | Action    |
+| SPEAKEASY DATE          | Action    |
+| STAGECOACH ARMAGEDDON   | Action    |
+| STORY SIDE              | Action    |
+| SUSPECTS QUILLS         | Action    |
+| TRIP NEWTON             | Action    |
+| TRUMAN CRAZY            | Action    |
+| UPRISING UPTOWN         | Action    |
+| WATERFRONT DELIVERANCE  | Action    |
+| WEREWOLF LOLA           | Action    |
+| WOMEN DORADO            | Action    |
+| WORST BANGER            | Action    |
+| ALTER VICTORY           | Animation |
+| ANACONDA CONFESSIONS    | Animation |
+| ARGONAUTS TOWN          | Animation |
+| BIKINI BORROWERS        | Animation |
+| BLACKOUT PRIVATE        | Animation |
+| BORROWERS BEDAZZLED     | Animation |
+| CANYON STOCK            | Animation |
+| CAROL TEXAS             | Animation |
+| CHAMPION FLATLINERS     | Animation |
+| CLASH FREDDY            | Animation |
+| CLUB GRAFFITI           | Animation |
+| CROSSROADS CASUALTIES   | Animation |
+| DARES PLUTO             | Animation |
+| DESIRE ALIEN            | Animation |
+| DOGMA FAMILY            | Animation |
+| DONNIE ALLEY            | Animation |
+| DOORS PRESIDENT         | Animation |
+| DOUBLE WRATH            | Animation |
+| DUCK RACER              | Animation |
+| EARLY HOME              | Animation |
+| FALCON VOLUME           | Animation |
+| FIGHT JAWBREAKER        | Animation |
+| FLOATS GARDEN           | Animation |
+| FLYING HOOK             | Animation |
+| FORRESTER COMANCHEROS   | Animation |
+| GANGS PRIDE             | Animation |
+| GHOSTBUSTERS ELF        | Animation |
+| HARPER DYING            | Animation |
+| HOOK CHARIOTS           | Animation |
+| HORN WORKING            | Animation |
+| INCH JET                | Animation |
+| INSECTS STONE           | Animation |
+| INTENTIONS EMPIRE       | Animation |
+| ISHTAR ROCKETEER        | Animation |
+| JUGGLER HARDLY          | Animation |
+| LAWLESS VISION          | Animation |
++-------------------------+-----------+
+100 rows in set (0.0274 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc actor;
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| Field       | Type              | Null | Key | Default           | Extra                                         |
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| actor_id    | smallint unsigned | NO   | PRI | NULL              | auto_increment                                |
+| first_name  | varchar(45)       | NO   |     | NULL              |                                               |
+| last_name   | varchar(45)       | NO   | MUL | NULL              |                                               |
+| last_update | timestamp         | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+4 rows in set (0.0023 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc film_actor;
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| Field       | Type              | Null | Key | Default           | Extra                                         |
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| actor_id    | smallint unsigned | NO   | PRI | NULL              |                                               |
+| film_id     | smallint unsigned | NO   | PRI | NULL              |                                               |
+| last_update | timestamp         | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+3 rows in set (0.0016 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc film;
++----------------------+---------------------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field                | Type                                                                | Null | Key | Default           | Extra                                         |
++----------------------+---------------------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| film_id              | smallint unsigned                                                   | NO   | PRI | NULL              | auto_increment                                |
+| title                | varchar(255)                                                        | NO   | MUL | NULL              |                                               |
+| description          | text                                                                | YES  |     | NULL              |                                               |
+| release_year         | year                                                                | YES  |     | NULL              |                                               |
+| language_id          | tinyint unsigned                                                    | NO   | MUL | NULL              |                                               |
+| original_language_id | tinyint unsigned                                                    | YES  | MUL | NULL              |                                               |
+| rental_duration      | tinyint unsigned                                                    | NO   |     | 3                 |                                               |
+| rental_rate          | decimal(4,2)                                                        | NO   |     | 4.99              |                                               |
+| length               | smallint unsigned                                                   | YES  |     | NULL              |                                               |
+| replacement_cost     | decimal(5,2)                                                        | NO   |     | 19.99             |                                               |
+| rating               | enum('G','PG','PG-13','R','NC-17')                                  | YES  |     | G                 |                                               |
+| special_features     | set('Trailers','Commentaries','Deleted Scenes','Behind the Scenes') | YES  |     | NULL              |                                               |
+| last_update          | timestamp                                                           | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++----------------------+---------------------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+13 rows in set (0.0011 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > select a.first_name, a.last_name, c.title
+                                       -> from actor a
+                                       -> inner join film_actor b
+                                       -> on a.actor_id = b.actor_id
+                                       -> inner join film c
+                                       -> on b.film_id = c.film_id
+                                       -> limit  100;
++------------+--------------+-----------------------+
+| first_name | last_name    | title                 |
++------------+--------------+-----------------------+
+| PENELOPE   | GUINESS      | ACADEMY DINOSAUR      |
+| PENELOPE   | GUINESS      | ANACONDA CONFESSIONS  |
+| PENELOPE   | GUINESS      | ANGELS LIFE           |
+| PENELOPE   | GUINESS      | BULWORTH COMMANDMENTS |
+| PENELOPE   | GUINESS      | CHEAPER CLYDE         |
+| PENELOPE   | GUINESS      | COLOR PHILADELPHIA    |
+| PENELOPE   | GUINESS      | ELEPHANT TROJAN       |
+| PENELOPE   | GUINESS      | GLEAMING JAWBREAKER   |
+| PENELOPE   | GUINESS      | HUMAN GRAFFITI        |
+| PENELOPE   | GUINESS      | KING EVOLUTION        |
+| PENELOPE   | GUINESS      | LADY STAGE            |
+| PENELOPE   | GUINESS      | LANGUAGE COWBOY       |
+| PENELOPE   | GUINESS      | MULHOLLAND BEAST      |
+| PENELOPE   | GUINESS      | OKLAHOMA JUMANJI      |
+| PENELOPE   | GUINESS      | RULES HUMAN           |
+| PENELOPE   | GUINESS      | SPLASH GUMP           |
+| PENELOPE   | GUINESS      | VERTIGO NORTHWEST     |
+| PENELOPE   | GUINESS      | WESTWARD SEABISCUIT   |
+| PENELOPE   | GUINESS      | WIZARD COLDBLOODED    |
+| NICK       | WAHLBERG     | ADAPTATION HOLES      |
+| NICK       | WAHLBERG     | APACHE DIVINE         |
+| NICK       | WAHLBERG     | BABY HALL             |
+| NICK       | WAHLBERG     | BULL SHAWSHANK        |
+| NICK       | WAHLBERG     | CHAINSAW UPTOWN       |
+| NICK       | WAHLBERG     | CHISUM BEHAVIOR       |
+| NICK       | WAHLBERG     | DESTINY SATURDAY      |
+| NICK       | WAHLBERG     | DRACULA CRYSTAL       |
+| NICK       | WAHLBERG     | FIGHT JAWBREAKER      |
+| NICK       | WAHLBERG     | FLASH WARS            |
+| NICK       | WAHLBERG     | GILBERT PELICAN       |
+| NICK       | WAHLBERG     | GOODFELLAS SALUTE     |
+| NICK       | WAHLBERG     | HAPPINESS UNITED      |
+| NICK       | WAHLBERG     | INDIAN LOVE           |
+| NICK       | WAHLBERG     | JEKYLL FROGMEN        |
+| NICK       | WAHLBERG     | JERSEY SASSY          |
+| NICK       | WAHLBERG     | LIAISONS SWEET        |
+| NICK       | WAHLBERG     | LUCKY FLYING          |
+| NICK       | WAHLBERG     | MAGUIRE APACHE        |
+| NICK       | WAHLBERG     | MALLRATS UNITED       |
+| NICK       | WAHLBERG     | MASK PEACH            |
+| NICK       | WAHLBERG     | ROOF CHAMPION         |
+| NICK       | WAHLBERG     | RUSHMORE MERMAID      |
+| NICK       | WAHLBERG     | SMILE EARRING         |
+| NICK       | WAHLBERG     | WARDROBE PHANTOM      |
+| ED         | CHASE        | ALONE TRIP            |
+| ED         | CHASE        | ARMY FLINTSTONES      |
+| ED         | CHASE        | ARTIST COLDBLOODED    |
+| ED         | CHASE        | BOONDOCK BALLROOM     |
+| ED         | CHASE        | CADDYSHACK JEDI       |
+| ED         | CHASE        | COWBOY DOOM           |
+| ED         | CHASE        | EVE RESURRECTION      |
+| ED         | CHASE        | FORREST SONS          |
+| ED         | CHASE        | FRENCH HOLIDAY        |
+| ED         | CHASE        | FROST HEAD            |
+| ED         | CHASE        | HALLOWEEN NUTS        |
+| ED         | CHASE        | HUNTER ALTER          |
+| ED         | CHASE        | IMAGE PRINCESS        |
+| ED         | CHASE        | JEEPERS WEDDING       |
+| ED         | CHASE        | LUCK OPUS             |
+| ED         | CHASE        | NECKLACE OUTBREAK     |
+| ED         | CHASE        | PLATOON INSTINCT      |
+| ED         | CHASE        | SPICE SORORITY        |
+| ED         | CHASE        | WEDDING APOLLO        |
+| ED         | CHASE        | WEEKEND PERSONAL      |
+| ED         | CHASE        | WHALE BIKINI          |
+| ED         | CHASE        | YOUNG LANGUAGE        |
+| JENNIFER   | DAVIS        | ANACONDA CONFESSIONS  |
+| JENNIFER   | DAVIS        | ANGELS LIFE           |
+| JENNIFER   | DAVIS        | BAREFOOT MANCHURIAN   |
+| JENNIFER   | DAVIS        | BED HIGHBALL          |
+| JENNIFER   | DAVIS        | BLADE POLISH          |
+| JENNIFER   | DAVIS        | BOONDOCK BALLROOM     |
+| JENNIFER   | DAVIS        | GHOSTBUSTERS ELF      |
+| JENNIFER   | DAVIS        | GREEDY ROOTS          |
+| JENNIFER   | DAVIS        | HANOVER GALAXY        |
+| JENNIFER   | DAVIS        | INSTINCT AIRPORT      |
+| JENNIFER   | DAVIS        | JUMANJI BLADE         |
+| JENNIFER   | DAVIS        | NATIONAL STORY        |
+| JENNIFER   | DAVIS        | OKLAHOMA JUMANJI      |
+| JENNIFER   | DAVIS        | POSEIDON FOREVER      |
+| JENNIFER   | DAVIS        | RAIDERS ANTITRUST     |
+| JENNIFER   | DAVIS        | RANDOM GO             |
+| JENNIFER   | DAVIS        | REDS POCUS            |
+| JENNIFER   | DAVIS        | SILVERADO GOLDFINGER  |
+| JENNIFER   | DAVIS        | SPLASH GUMP           |
+| JENNIFER   | DAVIS        | SUBMARINE BED         |
+| JENNIFER   | DAVIS        | TREASURE COMMAND      |
+| JENNIFER   | DAVIS        | UNFORGIVEN ZOOLANDER  |
+| JOHNNY     | LOLLOBRIGIDA | AMADEUS HOLY          |
+| JOHNNY     | LOLLOBRIGIDA | BANGER PINOCCHIO      |
+| JOHNNY     | LOLLOBRIGIDA | BONNIE HOLOCAUST      |
+| JOHNNY     | LOLLOBRIGIDA | CHITTY LOCK           |
+| JOHNNY     | LOLLOBRIGIDA | COMMANDMENTS EXPRESS  |
+| JOHNNY     | LOLLOBRIGIDA | CONEHEADS SMOOCHY     |
+| JOHNNY     | LOLLOBRIGIDA | DADDY PITTSBURGH      |
+| JOHNNY     | LOLLOBRIGIDA | DAISY MENAGERIE       |
+| JOHNNY     | LOLLOBRIGIDA | ENOUGH RAGING         |
+| JOHNNY     | LOLLOBRIGIDA | ESCAPE METROPOLIS     |
+| JOHNNY     | LOLLOBRIGIDA | FIRE WOLVES           |
+| JOHNNY     | LOLLOBRIGIDA | FRONTIER CABIN        |
++------------+--------------+-----------------------+
+100 rows in set (0.0266 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc customer;
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| Field       | Type              | Null | Key | Default           | Extra                                         |
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| customer_id | smallint unsigned | NO   | PRI | NULL              | auto_increment                                |
+| store_id    | tinyint unsigned  | NO   | MUL | NULL              |                                               |
+| first_name  | varchar(45)       | NO   |     | NULL              |                                               |
+| last_name   | varchar(45)       | NO   | MUL | NULL              |                                               |
+| email       | varchar(50)       | YES  |     | NULL              |                                               |
+| address_id  | smallint unsigned | NO   | MUL | NULL              |                                               |
+| active      | tinyint(1)        | NO   |     | 1                 |                                               |
+| create_date | datetime          | NO   |     | NULL              |                                               |
+| last_update | timestamp         | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+9 rows in set (0.0018 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc payment;
++--------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| Field        | Type              | Null | Key | Default           | Extra                                         |
++--------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| payment_id   | smallint unsigned | NO   | PRI | NULL              | auto_increment                                |
+| customer_id  | smallint unsigned | NO   | MUL | NULL              |                                               |
+| staff_id     | tinyint unsigned  | NO   | MUL | NULL              |                                               |
+| rental_id    | int               | YES  | MUL | NULL              |                                               |
+| amount       | decimal(5,2)      | NO   |     | NULL              |                                               |
+| payment_date | datetime          | NO   |     | NULL              |                                               |
+| last_update  | timestamp         | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++--------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+7 rows in set (0.0012 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > select a.first_name, a.last_name,
+                                       -> b.amount
+                                       -> from customer a
+                                       -> inner join payment b
+                                       -> on a.customer_id = b.customer_id
+                                       -> limit 100;
++------------+-----------+--------+
+| first_name | last_name | amount |
++------------+-----------+--------+
+| MARY       | SMITH     |   2.99 |
+| MARY       | SMITH     |   0.99 |
+| MARY       | SMITH     |   5.99 |
+| MARY       | SMITH     |   0.99 |
+| MARY       | SMITH     |   9.99 |
+| MARY       | SMITH     |   4.99 |
+| MARY       | SMITH     |   4.99 |
+| MARY       | SMITH     |   0.99 |
+| MARY       | SMITH     |   3.99 |
+| MARY       | SMITH     |   5.99 |
+| MARY       | SMITH     |   5.99 |
+| MARY       | SMITH     |   4.99 |
+| MARY       | SMITH     |   4.99 |
+| MARY       | SMITH     |   7.99 |
+| MARY       | SMITH     |   2.99 |
+| MARY       | SMITH     |   4.99 |
+| MARY       | SMITH     |   4.99 |
+| MARY       | SMITH     |   0.99 |
+| MARY       | SMITH     |   0.99 |
+| MARY       | SMITH     |   2.99 |
+| MARY       | SMITH     |   2.99 |
+| MARY       | SMITH     |   4.99 |
+| MARY       | SMITH     |   3.99 |
+| MARY       | SMITH     |   0.99 |
+| MARY       | SMITH     |   4.99 |
+| MARY       | SMITH     |   0.99 |
+| MARY       | SMITH     |   0.99 |
+| MARY       | SMITH     |   2.99 |
+| MARY       | SMITH     |   0.99 |
+| MARY       | SMITH     |   1.99 |
+| MARY       | SMITH     |   2.99 |
+| MARY       | SMITH     |   5.99 |
+| PATRICIA   | JOHNSON   |   4.99 |
+| PATRICIA   | JOHNSON   |   2.99 |
+| PATRICIA   | JOHNSON   |   2.99 |
+| PATRICIA   | JOHNSON   |   6.99 |
+| PATRICIA   | JOHNSON   |   4.99 |
+| PATRICIA   | JOHNSON   |   5.99 |
+| PATRICIA   | JOHNSON   |   5.99 |
+| PATRICIA   | JOHNSON   |   5.99 |
+| PATRICIA   | JOHNSON   |   2.99 |
+| PATRICIA   | JOHNSON   |   5.99 |
+| PATRICIA   | JOHNSON   |   4.99 |
+| PATRICIA   | JOHNSON   |  10.99 |
+| PATRICIA   | JOHNSON   |   0.99 |
+| PATRICIA   | JOHNSON   |   6.99 |
+| PATRICIA   | JOHNSON   |   6.99 |
+| PATRICIA   | JOHNSON   |   2.99 |
+| PATRICIA   | JOHNSON   |   0.99 |
+| PATRICIA   | JOHNSON   |   0.99 |
+| PATRICIA   | JOHNSON   |   5.99 |
+| PATRICIA   | JOHNSON   |   6.99 |
+| PATRICIA   | JOHNSON   |   2.99 |
+| PATRICIA   | JOHNSON   |   2.99 |
+| PATRICIA   | JOHNSON   |   2.99 |
+| PATRICIA   | JOHNSON   |   4.99 |
+| PATRICIA   | JOHNSON   |   5.99 |
+| PATRICIA   | JOHNSON   |   4.99 |
+| PATRICIA   | JOHNSON   |   4.99 |
+| LINDA      | WILLIAMS  |   1.99 |
+| LINDA      | WILLIAMS  |   2.99 |
+| LINDA      | WILLIAMS  |   8.99 |
+| LINDA      | WILLIAMS  |   6.99 |
+| LINDA      | WILLIAMS  |   6.99 |
+| LINDA      | WILLIAMS  |   2.99 |
+| LINDA      | WILLIAMS  |   4.99 |
+| LINDA      | WILLIAMS  |   4.99 |
+| LINDA      | WILLIAMS  |   5.99 |
+| LINDA      | WILLIAMS  |  10.99 |
+| LINDA      | WILLIAMS  |   7.99 |
+| LINDA      | WILLIAMS  |   6.99 |
+| LINDA      | WILLIAMS  |   4.99 |
+| LINDA      | WILLIAMS  |   4.99 |
+| LINDA      | WILLIAMS  |   2.99 |
+| LINDA      | WILLIAMS  |   1.99 |
+| LINDA      | WILLIAMS  |   3.99 |
+| LINDA      | WILLIAMS  |   2.99 |
+| LINDA      | WILLIAMS  |   4.99 |
+| LINDA      | WILLIAMS  |   5.99 |
+| LINDA      | WILLIAMS  |   4.99 |
+| LINDA      | WILLIAMS  |   8.99 |
+| LINDA      | WILLIAMS  |   2.99 |
+| LINDA      | WILLIAMS  |   8.99 |
+| LINDA      | WILLIAMS  |   0.99 |
+| LINDA      | WILLIAMS  |   2.99 |
+| BARBARA    | JONES     |   4.99 |
+| BARBARA    | JONES     |   0.99 |
+| BARBARA    | JONES     |   2.99 |
+| BARBARA    | JONES     |   0.99 |
+| BARBARA    | JONES     |   0.99 |
+| BARBARA    | JONES     |   5.99 |
+| BARBARA    | JONES     |   2.99 |
+| BARBARA    | JONES     |   2.99 |
+| BARBARA    | JONES     |   3.99 |
+| BARBARA    | JONES     |   5.99 |
+| BARBARA    | JONES     |   5.99 |
+| BARBARA    | JONES     |   0.99 |
+| BARBARA    | JONES     |   2.99 |
+| BARBARA    | JONES     |   4.99 |
+| BARBARA    | JONES     |   2.99 |
++------------+-----------+--------+
+100 rows in set (0.0117 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc inventory;
++--------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+| Field        | Type               | Null | Key | Default           | Extra                                         |
++--------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+| inventory_id | mediumint unsigned | NO   | PRI | NULL              | auto_increment                                |
+| film_id      | smallint unsigned  | NO   | MUL | NULL              |                                               |
+| store_id     | tinyint unsigned   | NO   | MUL | NULL              |                                               |
+| last_update  | timestamp          | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++--------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+4 rows in set (0.0013 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > select a.title, b.inventory,
+                                       -> ^C
+ MySQL  localhost:3306 ssl  sakila  SQL > select a.title, b.inventory_id,
+                                       -> b.store_id
+                                       -> from film a
+                                       -> inner join inventory b
+                                       -> on a.film_id = a.film_id
+                                       -> limit 100;
++-------------------------+--------------+----------+
+| title                   | inventory_id | store_id |
++-------------------------+--------------+----------+
+| ZORRO ARK               |            1 |        1 |
+| ZOOLANDER FICTION       |            1 |        1 |
+| ZHIVAGO CORE            |            1 |        1 |
+| YOUTH KICK              |            1 |        1 |
+| YOUNG LANGUAGE          |            1 |        1 |
+| YENTL IDAHO             |            1 |        1 |
+| WYOMING STORM           |            1 |        1 |
+| WRONG BEHAVIOR          |            1 |        1 |
+| WRATH MILE              |            1 |        1 |
+| WORST BANGER            |            1 |        1 |
+| WORLD LEATHERNECKS      |            1 |        1 |
+| WORKING MICROCOSMOS     |            1 |        1 |
+| WORKER TARZAN           |            1 |        1 |
+| WORDS HUNTER            |            1 |        1 |
+| WONKA SEA               |            1 |        1 |
+| WONDERLAND CHRISTMAS    |            1 |        1 |
+| WONDERFUL DROP          |            1 |        1 |
+| WON DARES               |            1 |        1 |
+| WOMEN DORADO            |            1 |        1 |
+| WOLVES DESIRE           |            1 |        1 |
+| WIZARD COLDBLOODED      |            1 |        1 |
+| WITCHES PANIC           |            1 |        1 |
+| WISDOM WORKER           |            1 |        1 |
+| WINDOW SIDE             |            1 |        1 |
+| WIND PHANTOM            |            1 |        1 |
+| WILLOW TRACY            |            1 |        1 |
+| WILD APOLLO             |            1 |        1 |
+| WIFE TURN               |            1 |        1 |
+| WHISPERER GIANT         |            1 |        1 |
+| WHALE BIKINI            |            1 |        1 |
+| WESTWARD SEABISCUIT     |            1 |        1 |
+| WEST LION               |            1 |        1 |
+| WEREWOLF LOLA           |            1 |        1 |
+| WEEKEND PERSONAL        |            1 |        1 |
+| WEDDING APOLLO          |            1 |        1 |
+| WATERSHIP FRONTIER      |            1 |        1 |
+| WATERFRONT DELIVERANCE  |            1 |        1 |
+| WATCH TRACY             |            1 |        1 |
+| WASTELAND DIVINE        |            1 |        1 |
+| WASH HEAVENLY           |            1 |        1 |
+| WARS PLUTO              |            1 |        1 |
+| WARLOCK WEREWOLF        |            1 |        1 |
+| WARDROBE PHANTOM        |            1 |        1 |
+| WAR NOTTING             |            1 |        1 |
+| WANDA CHAMBER           |            1 |        1 |
+| WALLS ARTIST            |            1 |        1 |
+| WAKE JAWS               |            1 |        1 |
+| WAIT CIDER              |            1 |        1 |
+| WAGON JAWS              |            1 |        1 |
+| VOYAGE LEGALLY          |            1 |        1 |
+| VOLUME HOUSE            |            1 |        1 |
+| VOLCANO TEXAS           |            1 |        1 |
+| VOICE PEACH             |            1 |        1 |
+| VISION TORQUE           |            1 |        1 |
+| VIRTUAL SPOILERS        |            1 |        1 |
+| VIRGINIAN PLUTO         |            1 |        1 |
+| VIRGIN DAISY            |            1 |        1 |
+| VILLAIN DESPERATE       |            1 |        1 |
+| VIETNAM SMOOCHY         |            1 |        1 |
+| VIDEOTAPE ARSENIC       |            1 |        1 |
+| VICTORY ACADEMY         |            1 |        1 |
+| VERTIGO NORTHWEST       |            1 |        1 |
+| VELVET TERMINATOR       |            1 |        1 |
+| VARSITY TRIP            |            1 |        1 |
+| VANISHING ROCKY         |            1 |        1 |
+| VANISHED GARDEN         |            1 |        1 |
+| VANILLA DAY             |            1 |        1 |
+| VAMPIRE WHALE           |            1 |        1 |
+| VALLEY PACKER           |            1 |        1 |
+| VALENTINE VANISHING     |            1 |        1 |
+| VACATION BOONDOCK       |            1 |        1 |
+| USUAL UNTOUCHABLES      |            1 |        1 |
+| UPTOWN YOUNG            |            1 |        1 |
+| UPRISING UPTOWN         |            1 |        1 |
+| UNTOUCHABLES SUNRISE    |            1 |        1 |
+| UNITED PILOT            |            1 |        1 |
+| UNFORGIVEN ZOOLANDER    |            1 |        1 |
+| UNFAITHFUL KILL         |            1 |        1 |
+| UNDEFEATED DALMATIONS   |            1 |        1 |
+| UNCUT SUICIDES          |            1 |        1 |
+| UNBREAKABLE KARATE      |            1 |        1 |
+| TYCOON GATHERING        |            1 |        1 |
+| TWISTED PIRATES         |            1 |        1 |
+| TUXEDO MILE             |            1 |        1 |
+| TURN STAR               |            1 |        1 |
+| TRUMAN CRAZY            |            1 |        1 |
+| TROUBLE DATE            |            1 |        1 |
+| TROOPERS METAL          |            1 |        1 |
+| TROJAN TOMORROW         |            1 |        1 |
+| TRIP NEWTON             |            1 |        1 |
+| TREATMENT JEKYLL        |            1 |        1 |
+| TREASURE COMMAND        |            1 |        1 |
+| TRAP GUYS               |            1 |        1 |
+| TRANSLATION SUMMER      |            1 |        1 |
+| TRAMP OTHERS            |            1 |        1 |
+| TRAINSPOTTING STRANGERS |            1 |        1 |
+| TRAIN BUNCH             |            1 |        1 |
+| TRAFFIC HOBBIT          |            1 |        1 |
+| TRADING PINOCCHIO       |            1 |        1 |
+| TRACY CIDER             |            1 |        1 |
++-------------------------+--------------+----------+
+100 rows in set (0.0111 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > select a.title, b.inventory_id,  b.store_id  from film a inner join inventory b  on a.film_id = b.film_id limit 100;
++-----------------------------+--------------+----------+
+| title                       | inventory_id | store_id |
++-----------------------------+--------------+----------+
+| ACADEMY DINOSAUR            |            1 |        1 |
+| ACADEMY DINOSAUR            |            2 |        1 |
+| ACADEMY DINOSAUR            |            3 |        1 |
+| ACADEMY DINOSAUR            |            4 |        1 |
+| AFFAIR PREJUDICE            |           16 |        1 |
+| AFFAIR PREJUDICE            |           17 |        1 |
+| AFFAIR PREJUDICE            |           18 |        1 |
+| AFFAIR PREJUDICE            |           19 |        1 |
+| AGENT TRUMAN                |           26 |        1 |
+| AGENT TRUMAN                |           27 |        1 |
+| AGENT TRUMAN                |           28 |        1 |
+| AIRPLANE SIERRA             |           32 |        1 |
+| AIRPLANE SIERRA             |           33 |        1 |
+| ALABAMA DEVIL               |           41 |        1 |
+| ALABAMA DEVIL               |           42 |        1 |
+| ALABAMA DEVIL               |           43 |        1 |
+| ALADDIN CALENDAR            |           46 |        1 |
+| ALADDIN CALENDAR            |           47 |        1 |
+| ALADDIN CALENDAR            |           48 |        1 |
+| ALADDIN CALENDAR            |           49 |        1 |
+| ALAMO VIDEOTAPE             |           53 |        1 |
+| ALAMO VIDEOTAPE             |           54 |        1 |
+| ALAMO VIDEOTAPE             |           55 |        1 |
+| ALAMO VIDEOTAPE             |           56 |        1 |
+| ALASKA PHANTOM              |           60 |        1 |
+| ALASKA PHANTOM              |           61 |        1 |
+| ALASKA PHANTOM              |           62 |        1 |
+| ALIEN CENTER                |           71 |        1 |
+| ALIEN CENTER                |           72 |        1 |
+| ALLEY EVOLUTION             |           77 |        1 |
+| ALLEY EVOLUTION             |           78 |        1 |
+| ALONE TRIP                  |           81 |        1 |
+| ALONE TRIP                  |           82 |        1 |
+| ALONE TRIP                  |           83 |        1 |
+| ALTER VICTORY               |           87 |        1 |
+| ALTER VICTORY               |           88 |        1 |
+| ALTER VICTORY               |           89 |        1 |
+| AMADEUS HOLY                |           93 |        1 |
+| AMADEUS HOLY                |           94 |        1 |
+| AMADEUS HOLY                |           95 |        1 |
+| AMADEUS HOLY                |           96 |        1 |
+| AMELIE HELLFIGHTERS         |           99 |        1 |
+| AMELIE HELLFIGHTERS         |          100 |        1 |
+| AMELIE HELLFIGHTERS         |          101 |        1 |
+| AMERICAN CIRCUS             |          102 |        1 |
+| AMERICAN CIRCUS             |          103 |        1 |
+| AMISTAD MIDSUMMER           |          108 |        1 |
+| AMISTAD MIDSUMMER           |          109 |        1 |
+| AMISTAD MIDSUMMER           |          110 |        1 |
+| AMISTAD MIDSUMMER           |          111 |        1 |
+| ANACONDA CONFESSIONS        |          115 |        1 |
+| ANACONDA CONFESSIONS        |          116 |        1 |
+| ANACONDA CONFESSIONS        |          117 |        1 |
+| ANALYZE HOOSIERS            |          120 |        1 |
+| ANALYZE HOOSIERS            |          121 |        1 |
+| ANALYZE HOOSIERS            |          122 |        1 |
+| ANALYZE HOOSIERS            |          123 |        1 |
+| ANGELS LIFE                 |          124 |        1 |
+| ANGELS LIFE                 |          125 |        1 |
+| ANGELS LIFE                 |          126 |        1 |
+| ANGELS LIFE                 |          127 |        1 |
+| ANNIE IDENTITY              |          130 |        1 |
+| ANNIE IDENTITY              |          131 |        1 |
+| ANONYMOUS HUMAN             |          135 |        1 |
+| ANONYMOUS HUMAN             |          136 |        1 |
+| ANONYMOUS HUMAN             |          137 |        1 |
+| ANONYMOUS HUMAN             |          138 |        1 |
+| ANTHEM LUKE                 |          139 |        1 |
+| ANTHEM LUKE                 |          140 |        1 |
+| ANTHEM LUKE                 |          141 |        1 |
+| ANTITRUST TOMATOES          |          142 |        1 |
+| ANTITRUST TOMATOES          |          143 |        1 |
+| ANYTHING SAVANNAH           |          144 |        1 |
+| ANYTHING SAVANNAH           |          145 |        1 |
+| APACHE DIVINE               |          146 |        1 |
+| APACHE DIVINE               |          147 |        1 |
+| APACHE DIVINE               |          148 |        1 |
+| APACHE DIVINE               |          149 |        1 |
+| ARACHNOPHOBIA ROLLERCOASTER |          160 |        1 |
+| ARACHNOPHOBIA ROLLERCOASTER |          161 |        1 |
+| ARACHNOPHOBIA ROLLERCOASTER |          162 |        1 |
+| ARACHNOPHOBIA ROLLERCOASTER |          163 |        1 |
+| ARIZONA BANG                |          167 |        1 |
+| ARIZONA BANG                |          168 |        1 |
+| ARIZONA BANG                |          169 |        1 |
+| ARIZONA BANG                |          170 |        1 |
+| ARMAGEDDON LOST             |          174 |        1 |
+| ARMAGEDDON LOST             |          175 |        1 |
+| ARMAGEDDON LOST             |          176 |        1 |
+| ATLANTIS CAUSE              |          189 |        1 |
+| ATLANTIS CAUSE              |          190 |        1 |
+| ATLANTIS CAUSE              |          191 |        1 |
+| ATTACKS HATE                |          196 |        1 |
+| ATTACKS HATE                |          197 |        1 |
+| ATTRACTION NEWTON           |          201 |        1 |
+| ATTRACTION NEWTON           |          202 |        1 |
+| ATTRACTION NEWTON           |          203 |        1 |
+| ATTRACTION NEWTON           |          204 |        1 |
+| BACKLASH UNDEFEATED         |          212 |        1 |
+| BACKLASH UNDEFEATED         |          213 |        1 |
++-----------------------------+--------------+----------+
+100 rows in set (0.0009 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc rental;
++--------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+| Field        | Type               | Null | Key | Default           | Extra                                         |
++--------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+| rental_id    | int                | NO   | PRI | NULL              | auto_increment                                |
+| rental_date  | datetime           | NO   | MUL | NULL              |                                               |
+| inventory_id | mediumint unsigned | NO   | MUL | NULL              |                                               |
+| customer_id  | smallint unsigned  | NO   | MUL | NULL              |                                               |
+| return_date  | datetime           | YES  |     | NULL              |                                               |
+| staff_id     | tinyint unsigned   | NO   | MUL | NULL              |                                               |
+| last_update  | timestamp          | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++--------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+7 rows in set (0.0022 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc customer;
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| Field       | Type              | Null | Key | Default           | Extra                                         |
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+| customer_id | smallint unsigned | NO   | PRI | NULL              | auto_increment                                |
+| store_id    | tinyint unsigned  | NO   | MUL | NULL              |                                               |
+| first_name  | varchar(45)       | NO   |     | NULL              |                                               |
+| last_name   | varchar(45)       | NO   | MUL | NULL              |                                               |
+| email       | varchar(50)       | YES  |     | NULL              |                                               |
+| address_id  | smallint unsigned | NO   | MUL | NULL              |                                               |
+| active      | tinyint(1)        | NO   |     | 1                 |                                               |
+| create_date | datetime          | NO   |     | NULL              |                                               |
+| last_update | timestamp         | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-------------+-------------------+------+-----+-------------------+-----------------------------------------------+
+9 rows in set (0.0011 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc inventory;
++--------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+| Field        | Type               | Null | Key | Default           | Extra                                         |
++--------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+| inventory_id | mediumint unsigned | NO   | PRI | NULL              | auto_increment                                |
+| film_id      | smallint unsigned  | NO   | MUL | NULL              |                                               |
+| store_id     | tinyint unsigned   | NO   | MUL | NULL              |                                               |
+| last_update  | timestamp          | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++--------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+4 rows in set (0.0011 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > desc film;
++----------------------+---------------------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field                | Type                                                                | Null | Key | Default           | Extra                                         |
++----------------------+---------------------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| film_id              | smallint unsigned                                                   | NO   | PRI | NULL              | auto_increment                                |
+| title                | varchar(255)                                                        | NO   | MUL | NULL              |                                               |
+| description          | text                                                                | YES  |     | NULL              |                                               |
+| release_year         | year                                                                | YES  |     | NULL              |                                               |
+| language_id          | tinyint unsigned                                                    | NO   | MUL | NULL              |                                               |
+| original_language_id | tinyint unsigned                                                    | YES  | MUL | NULL              |                                               |
+| rental_duration      | tinyint unsigned                                                    | NO   |     | 3                 |                                               |
+| rental_rate          | decimal(4,2)                                                        | NO   |     | 4.99              |                                               |
+| length               | smallint unsigned                                                   | YES  |     | NULL              |                                               |
+| replacement_cost     | decimal(5,2)                                                        | NO   |     | 19.99             |                                               |
+| rating               | enum('G','PG','PG-13','R','NC-17')                                  | YES  |     | G                 |                                               |
+| special_features     | set('Trailers','Commentaries','Deleted Scenes','Behind the Scenes') | YES  |     | NULL              |                                               |
+| last_update          | timestamp                                                           | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++----------------------+---------------------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+13 rows in set (0.0013 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL > select a.first_name, a.last_name,
+                                       -> d.title, b.rental_date
+                                       -> from customer a
+                                       -> inner join rental b
+                                       -> on a.customer_id = b.customer_id
+                                       -> inner join inventory c
+                                       -> on b.inventory_id = c.inventory_id
+                                       -> inner join film d
+                                       -> on c.film_id = d.film_id
+                                       -> limit 100;
++------------+-------------+------------------+---------------------+
+| first_name | last_name   | title            | rental_date         |
++------------+-------------+------------------+---------------------+
+| JOEL       | FRANCISCO   | ACADEMY DINOSAUR | 2005-07-08 19:03:15 |
+| GABRIEL    | HARDER      | ACADEMY DINOSAUR | 2005-08-02 20:13:10 |
+| DIANNE     | SHELTON     | ACADEMY DINOSAUR | 2005-08-21 21:27:43 |
+| NORMAN     | CURRIER     | ACADEMY DINOSAUR | 2005-05-30 20:21:07 |
+| BEATRICE   | ARNOLD      | ACADEMY DINOSAUR | 2005-06-17 20:24:00 |
+| GERALDINE  | PERKINS     | ACADEMY DINOSAUR | 2005-07-07 10:41:31 |
+| VIRGIL     | WOFFORD     | ACADEMY DINOSAUR | 2005-07-30 22:02:34 |
+| WILLIE     | MARKHAM     | ACADEMY DINOSAUR | 2005-08-23 01:01:01 |
+| DEBRA      | NELSON      | ACADEMY DINOSAUR | 2005-07-31 21:36:07 |
+| DARREN     | WINDHAM     | ACADEMY DINOSAUR | 2005-08-22 23:56:37 |
+| ROBERT     | BAUGHMAN    | ACADEMY DINOSAUR | 2005-08-02 00:47:19 |
+| HENRY      | BILLINGSLEY | ACADEMY DINOSAUR | 2005-08-21 18:32:42 |
+| SERGIO     | STANFIELD   | ACADEMY DINOSAUR | 2005-05-27 07:03:28 |
+| FREDDIE    | DUGGAN      | ACADEMY DINOSAUR | 2005-06-21 00:30:26 |
+| MARIE      | TURNER      | ACADEMY DINOSAUR | 2005-07-07 20:59:06 |
+| MATTIE     | HOFFMAN     | ACADEMY DINOSAUR | 2005-07-27 07:51:11 |
+| DWAYNE     | OLVERA      | ACADEMY DINOSAUR | 2005-08-21 00:30:32 |
+| CARL       | ARTIS       | ACADEMY DINOSAUR | 2005-06-15 02:57:51 |
+| NATHAN     | RUNYON      | ACADEMY DINOSAUR | 2005-07-10 13:07:31 |
+| HECTOR     | POINDEXTER  | ACADEMY DINOSAUR | 2005-07-29 09:41:38 |
+| TINA       | SIMMONS     | ACADEMY DINOSAUR | 2005-08-22 00:44:08 |
+| SUSAN      | WILSON      | ACADEMY DINOSAUR | 2005-07-31 22:08:29 |
+| REBECCA    | SCOTT       | ACADEMY DINOSAUR | 2005-08-18 18:36:16 |
+| PENNY      | NEAL        | ACE GOLDFINGER   | 2005-08-01 04:24:47 |
+| BRANDON    | HUEY        | ACE GOLDFINGER   | 2006-02-14 15:16:03 |
+| LUCILLE    | HOLMES      | ACE GOLDFINGER   | 2005-07-07 19:46:51 |
+| KATHRYN    | COLEMAN     | ACE GOLDFINGER   | 2005-07-28 05:04:47 |
+| AMBER      | DIXON       | ACE GOLDFINGER   | 2005-08-22 16:59:05 |
+| STACY      | CUNNINGHAM  | ACE GOLDFINGER   | 2005-08-02 04:41:17 |
+| JESSIE     | MILAM       | ACE GOLDFINGER   | 2005-08-17 09:33:02 |
+| PEARL      | GARZA       | ADAPTATION HOLES | 2005-07-27 01:21:19 |
+| TRAVIS     | ESTEP       | ADAPTATION HOLES | 2005-08-22 03:52:21 |
+| STELLA     | MORENO      | ADAPTATION HOLES | 2005-08-02 15:45:10 |
+| CASSANDRA  | WALTERS     | ADAPTATION HOLES | 2005-08-23 13:54:39 |
+| DEBORAH    | WALKER      | ADAPTATION HOLES | 2005-05-31 04:50:07 |
+| ROBIN      | HAYES       | ADAPTATION HOLES | 2005-06-15 18:17:28 |
+| OLGA       | JIMENEZ     | ADAPTATION HOLES | 2005-07-06 19:11:43 |
+| MARY       | SMITH       | ADAPTATION HOLES | 2005-08-01 08:51:04 |
+| ROSE       | HOWARD      | ADAPTATION HOLES | 2005-08-17 13:16:38 |
+| JOANNE     | ROBERTSON   | ADAPTATION HOLES | 2005-07-06 22:01:51 |
+| STEVEN     | CURLEY      | ADAPTATION HOLES | 2005-07-27 23:19:29 |
+| MARION     | SNYDER      | ADAPTATION HOLES | 2005-08-18 21:45:15 |
+| VIVIAN     | RUIZ        | AFFAIR PREJUDICE | 2005-07-12 02:40:41 |
+| NINA       | SOTO        | AFFAIR PREJUDICE | 2005-07-30 02:30:07 |
+| JORDAN     | ARCHULETA   | AFFAIR PREJUDICE | 2005-08-22 21:16:54 |
+| DANIELLE   | DANIELS     | AFFAIR PREJUDICE | 2005-05-31 00:06:02 |
+| SUE        | PETERS      | AFFAIR PREJUDICE | 2005-06-17 18:06:14 |
+| MICHAEL    | SILVERMAN   | AFFAIR PREJUDICE | 2005-07-10 08:51:39 |
+| JEFF       | EAST        | AFFAIR PREJUDICE | 2005-07-27 00:26:14 |
+| MEGAN      | PALMER      | AFFAIR PREJUDICE | 2005-08-17 07:34:55 |
+| ELEANOR    | HUNT        | AFFAIR PREJUDICE | 2005-07-29 04:13:29 |
+| NATALIE    | MEYER       | AFFAIR PREJUDICE | 2005-08-22 16:17:49 |
+| TOMMY      | COLLAZO     | AFFAIR PREJUDICE | 2005-07-06 00:22:29 |
+| MINNIE     | ROMERO      | AFFAIR PREJUDICE | 2005-07-31 13:05:29 |
+| CARMEN     | OWENS       | AFFAIR PREJUDICE | 2005-08-22 15:26:36 |
+| DEANNA     | BYRD        | AFFAIR PREJUDICE | 2005-05-27 20:44:36 |
+| KIMBERLY   | LEE         | AFFAIR PREJUDICE | 2005-06-16 14:39:31 |
+| BEVERLY    | BROOKS      | AFFAIR PREJUDICE | 2005-07-08 16:22:01 |
+| JIMMY      | SCHRADER    | AFFAIR PREJUDICE | 2005-08-18 21:44:46 |
+| JANICE     | WARD        | AFFAIR PREJUDICE | 2005-07-11 20:21:18 |
+| RUBEN      | GEARY       | AFFAIR PREJUDICE | 2005-07-30 18:39:28 |
+| CARMEN     | OWENS       | AFFAIR PREJUDICE | 2006-02-14 15:16:03 |
+| WALLACE    | SLONE       | AFFAIR PREJUDICE | 2005-07-08 16:55:17 |
+| OSCAR      | AQUINO      | AFFAIR PREJUDICE | 2005-07-28 15:11:00 |
+| JEROME     | KENYON      | AFFAIR PREJUDICE | 2005-08-20 17:31:18 |
+| CONNIE     | WALLACE     | AFRICAN EGG      | 2005-05-28 07:53:38 |
+| RICARDO    | MEADOR      | AFRICAN EGG      | 2005-06-16 06:58:02 |
+| BARRY      | LOVELACE    | AFRICAN EGG      | 2005-07-12 08:36:22 |
+| CASEY      | MENA        | AFRICAN EGG      | 2005-08-02 09:08:44 |
+| JOSHUA     | MARK        | AFRICAN EGG      | 2005-08-19 05:00:16 |
+| CURTIS     | IRBY        | AFRICAN EGG      | 2005-06-18 05:21:12 |
+| NORA       | HERRERA     | AFRICAN EGG      | 2005-07-09 18:16:08 |
+| AMY        | LOPEZ       | AFRICAN EGG      | 2005-07-28 07:26:14 |
+| ELAINE     | STEVENS     | AFRICAN EGG      | 2005-08-19 09:07:13 |
+| GILBERT    | SLEDGE      | AFRICAN EGG      | 2005-07-09 02:35:43 |
+| JOYCE      | EDWARDS     | AFRICAN EGG      | 2005-07-31 12:50:24 |
+| SETH       | HANNON      | AFRICAN EGG      | 2006-02-14 15:16:03 |
+| CLARENCE   | GAMEZ       | AGENT TRUMAN     | 2005-05-26 23:23:56 |
+| JANET      | PHILLIPS    | AGENT TRUMAN     | 2005-06-21 15:11:02 |
+| LESLIE     | SEWARD      | AGENT TRUMAN     | 2005-07-08 06:40:06 |
+| PERRY      | SWAFFORD    | AGENT TRUMAN     | 2005-07-29 04:52:10 |
+| IDA        | ANDREWS     | AGENT TRUMAN     | 2005-08-18 23:14:15 |
+| CATHERINE  | CAMPBELL    | AGENT TRUMAN     | 2005-06-20 07:33:38 |
+| TERRY      | GRISSOM     | AGENT TRUMAN     | 2005-07-06 03:09:36 |
+| BETTY      | WHITE       | AGENT TRUMAN     | 2005-08-01 11:55:33 |
+| ALAN       | KAHN        | AGENT TRUMAN     | 2005-08-17 17:02:42 |
+| ELIZABETH  | BROWN       | AGENT TRUMAN     | 2005-07-29 01:11:23 |
+| TONYA      | CHAPMAN     | AGENT TRUMAN     | 2005-08-20 12:32:32 |
+| TRACY      | COLE        | AGENT TRUMAN     | 2005-07-10 15:11:54 |
+| DIANE      | COLLINS     | AGENT TRUMAN     | 2005-08-01 10:20:34 |
+| CORY       | MEEHAN      | AGENT TRUMAN     | 2005-08-18 13:31:45 |
+| MAURICE    | CRAWLEY     | AGENT TRUMAN     | 2005-05-26 15:32:46 |
+| GINA       | WILLIAMSON  | AGENT TRUMAN     | 2005-06-19 04:19:04 |
+| ANTHONY    | SCHWAB      | AGENT TRUMAN     | 2005-07-06 12:40:38 |
+| CLINTON    | BUFORD      | AGENT TRUMAN     | 2005-07-28 08:00:38 |
+| KRISTIN    | JOHNSTON    | AGENT TRUMAN     | 2005-08-18 11:31:34 |
+| ROSEMARY   | SCHMIDT     | AGENT TRUMAN     | 2005-08-02 13:54:26 |
+| MARTHA     | GONZALEZ    | AGENT TRUMAN     | 2005-08-21 16:03:01 |
+| FRED       | WHEAT       | AIRPLANE SIERRA  | 2005-08-02 07:34:19 |
+| DEAN       | SAUER       | AIRPLANE SIERRA  | 2005-08-22 05:58:27 |
++------------+-------------+------------------+---------------------+
+100 rows in set (0.0327 sec)
+ MySQL  localhost:3306 ssl  sakila  SQL >
